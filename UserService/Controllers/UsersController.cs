@@ -84,7 +84,6 @@ namespace UserService.Controllers
             return Ok("User registered successfully. Please check your email to activate your account.");
         }
 
-
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
@@ -246,6 +245,37 @@ namespace UserService.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Password changed successfully.");
+        }
+
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetUserProfile([FromQuery] string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username is required.");
+            }
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Return user details without sensitive information like password hash
+            var userProfile = new
+            {
+                user.Username,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                user.PhoneNumber,
+                user.DateOfBirth
+            };
+
+            return Ok(userProfile);
         }
 
     }
