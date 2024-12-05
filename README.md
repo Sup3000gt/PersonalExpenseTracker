@@ -44,7 +44,7 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 - `token`: Email confirmation token
 - `email`: User's email address
   
-**Response**: `200 OK` upon successful email confirmation
+- **Response**: `200 OK` upon successful email confirmation
 ---
 ### 3. Login
 - **Method**: `POST`
