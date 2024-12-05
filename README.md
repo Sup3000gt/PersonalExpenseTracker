@@ -69,3 +69,13 @@ Configure in `appsettings.json`:
     "AzureSqlConnection": "Server=<your-server>;Database=<your-database>;User ID=<your-username>;Password=<your-password>;"
   }
 }
+
+### Database Connection
+Configure in `appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "AzureSqlConnection": "Server=<your-server>;Database=<your-database>;User ID=<your-username>;Password=<your-password>;"
+  }
+}
