@@ -55,3 +55,5 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
     "username": "string",
     "password": "string"
   }
+
+  - **Response**: 200 OK upon successful authentication
