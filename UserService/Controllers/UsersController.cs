@@ -41,7 +41,6 @@ namespace UserService.Controllers
             user.EmailConfirmationToken = Guid.NewGuid().ToString();
             user.EmailConfirmationTokenExpires = DateTime.UtcNow.AddHours(24);
 
-            // Set default values
             user.EmailConfirmed = false;
 
             // Save the user to the database
@@ -54,9 +53,7 @@ namespace UserService.Controllers
             return Ok("User registered successfully. Please check your email to activate your account.");
         }
 
-        /// <summary>
         /// Confirm user's email
-        /// </summary>
         [HttpGet("confirm-email")]
         public IActionResult ConfirmEmail(string token)
         {
@@ -76,9 +73,7 @@ namespace UserService.Controllers
             return Ok("Email confirmed successfully. You can now log in.");
         }
 
-        /// <summary>
         /// Log in a user
-        /// </summary>
         [HttpPost("login")]
         public IActionResult Login([FromBody] User loginUser)
         {
