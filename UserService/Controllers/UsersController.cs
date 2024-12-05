@@ -280,15 +280,15 @@ namespace UserService.Controllers
         }
 
         [HttpPut("update-profile")]
-        public async Task<IActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
+        public async Task<IActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest updatedUser)
         {
-            if (request == null || string.IsNullOrEmpty(request.Username))
+            if (updatedUser == null || string.IsNullOrEmpty(updatedUser.Username))
             {
                 return BadRequest("Invalid request. Username is required.");
             }
 
             // Find user by username
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == updatedUser.Username);
 
             if (user == null)
             {
@@ -296,11 +296,11 @@ namespace UserService.Controllers
             }
 
             // Update fields
-            user.Email = request.Email ?? user.Email;
-            user.FirstName = request.FirstName ?? user.FirstName;
-            user.LastName = request.LastName ?? user.LastName;
-            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
-            user.DateOfBirth = request.DateOfBirth ?? user.DateOfBirth;
+            user.Email = updatedUser.Email ?? user.Email;
+            user.FirstName = updatedUser.FirstName ?? user.FirstName;
+            user.LastName = updatedUser.LastName ?? user.LastName;
+            user.PhoneNumber = updatedUser.PhoneNumber ?? user.PhoneNumber;
+            user.DateOfBirth = updatedUser.DateOfBirth ?? user.DateOfBirth;
 
             // Save changes
             _context.Users.Update(user);
