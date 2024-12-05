@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UserService.Data;
 using UserService.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace UserService.Controllers
 {
@@ -43,17 +44,14 @@ namespace UserService.Controllers
                 return BadRequest("Invalid or missing Date of Birth.");
             }
 
+            // Hash the password using PasswordHasher<T>
+            var passwordHasher = new PasswordHasher<User>();
+            user.PasswordHash = passwordHasher.HashPassword(user, user.PasswordHash);
+
             // Generate email confirmation token
             user.EmailConfirmationToken = Guid.NewGuid().ToString();
             user.EmailConfirmationTokenExpires = DateTime.UtcNow.AddHours(24);
             user.EmailConfirmed = false;
-
-            // Hash the password
-            using (var sha256 = SHA256.Create())
-            {
-                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(user.PasswordHash));
-                user.PasswordHash = Convert.ToBase64String(bytes);
-            }
 
             // Save the user to the database
             _context.Users.Add(user);
@@ -124,28 +122,24 @@ namespace UserService.Controllers
 
         /// Log in a user
         [HttpPost("login")]
-        public IActionResult Login([FromBody] User loginUser)
+        public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
-            // Find the user by username
-            var user = _context.Users.SingleOrDefault(u => u.Username == loginUser.Username);
-            if (user == null) return NotFound("User not found.");
-
-            // Verify email confirmation
-            if (!user.EmailConfirmed)
+            if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
             {
-                return Unauthorized("Email is not confirmed. Please confirm your email before logging in.");
+                return BadRequest("Username and password are required.");
             }
 
-            // Verify password
-            using (var sha256 = SHA256.Create())
+            var user = _context.Users.SingleOrDefault(u => u.Username == loginRequest.Username);
+            if (user == null || !user.EmailConfirmed)
             {
-                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(loginUser.PasswordHash));
-                var hashedPassword = Convert.ToBase64String(bytes);
+                return Unauthorized("Invalid username or password or email not confirmed.");
+            }
 
-                if (user.PasswordHash != hashedPassword)
-                {
-                    return Unauthorized("Invalid credentials.");
-                }
+            var passwordHasher = new PasswordHasher<User>();
+            var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
+            if (result != PasswordVerificationResult.Success)
+            {
+                return Unauthorized("Invalid username or password.");
             }
 
             return Ok("Login successful.");
