@@ -4,6 +4,7 @@ using UserService.Services;
 using UserService.Data;
 using UserService.Models;
 using Microsoft.AspNetCore.Identity;
+using Azure.Core;
 
 namespace UserService.Controllers
 {
@@ -118,7 +119,7 @@ namespace UserService.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] UserService.Models.LoginRequest loginRequest)
+        public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
             {
@@ -181,7 +182,7 @@ namespace UserService.Controllers
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] UserService.Models.ResetPasswordRequest request)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.NewPassword))
             {
@@ -276,6 +277,36 @@ namespace UserService.Controllers
             };
 
             return Ok(userProfile);
+        }
+
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Username))
+            {
+                return BadRequest("Invalid request. Username is required.");
+            }
+
+            // Find user by username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Update fields
+            user.Email = request.Email ?? user.Email;
+            user.FirstName = request.FirstName ?? user.FirstName;
+            user.LastName = request.LastName ?? user.LastName;
+            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
+            user.DateOfBirth = request.DateOfBirth ?? user.DateOfBirth;
+
+            // Save changes
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok("User profile updated successfully.");
         }
 
     }
