@@ -34,6 +34,7 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
     "dateOfBirth": "date"
   }
 
+
 - **Response**: 200 OK with registration confirmation
 ---
 ### 2. Confirm Email
