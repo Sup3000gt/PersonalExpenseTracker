@@ -38,22 +38,5 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
     "dateOfBirth": "date"
   }
 
-- **Method**: POST
+- **Response**: 200 OK with registration confirmation
   
-## API Endpoints
-
-### 1. Register User
-- **Method**: POST
-- **Endpoint**: `/api/Users/register`
-- **Request Body**:
-  ```json
-  {
-    "username": "string",
-    "password": "string",
-    "email": "string",
-    "firstName": "string",
-    "lastName": "string",
-    "phoneNumber": "string",
-    "dateOfBirth": "date"
-  }
-```
