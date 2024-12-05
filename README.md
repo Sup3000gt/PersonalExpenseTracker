@@ -76,7 +76,7 @@ Configure in `appsettings.json`:
 
 ```json
 {
-  "ConnectionStrings": {
-    "AzureSqlConnection": "Server=<your-server>;Database=<your-database>;User ID=<your-username>;Password=<your-password>;"
-  }
+"ConnectionStrings": {
+  "AzureSqlConnection": "Server=<your-server>;Database=<your-database>;User ID=<your-username>;Password=<your-password>;"
+}
 }
