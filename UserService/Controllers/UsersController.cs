@@ -6,6 +6,7 @@ using System.Text;
 using UserService.Data;
 using UserService.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace UserService.Controllers
 {
@@ -122,7 +123,7 @@ namespace UserService.Controllers
 
         /// Log in a user
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest loginRequest)
+        public IActionResult Login([FromBody] UserService.Models.LoginRequest loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
             {
@@ -144,6 +145,82 @@ namespace UserService.Controllers
 
             return Ok("Login successful.");
         }
+
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset([FromBody] string email)
+        {
+            // Find user by email
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            // Generate password reset token
+            user.PasswordResetToken = Guid.NewGuid().ToString();
+            user.PasswordResetTokenExpires = DateTime.UtcNow.AddHours(1);
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            try
+            {
+                // Send password reset email
+                var resetLink = Url.Action(
+                    "ResetPassword",
+                    "Users",
+                    new { token = user.PasswordResetToken, email = user.Email },
+                    Request.Scheme
+                );
+                var subject = "Reset your password";
+                var plainTextContent = $"Click here to reset your password: {resetLink}";
+                var htmlContent = $"<p>Click the link below to reset your password:</p><a href='{resetLink}'>Reset Password</a>";
+                await _emailService.SendEmailAsync(user.Email, subject, plainTextContent, htmlContent);
+
+                return Ok("Password reset email sent.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending password reset email: {ex.Message}");
+                return StatusCode(500, "Error sending password reset email.");
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] UserService.Models.ResetPasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.NewPassword))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            // Find user by email and token
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.PasswordResetToken == request.Token);
+            if (user == null)
+            {
+                return BadRequest("Invalid token or email.");
+            }
+
+            // Check if the token has expired
+            if (user.PasswordResetTokenExpires < DateTime.UtcNow)
+            {
+                return BadRequest("Token has expired. Please request a new password reset.");
+            }
+
+            // Hash the new password
+            var passwordHasher = new PasswordHasher<User>();
+            user.PasswordHash = passwordHasher.HashPassword(user, request.NewPassword);
+
+            // Clear the token and save changes
+            user.PasswordResetToken = null;
+            user.PasswordResetTokenExpires = null;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok("Password reset successfully.");
+        }
+
 
     }
 }
