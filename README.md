@@ -38,6 +38,8 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
     "dateOfBirth": "date"
   }
 
+- **Method**: POST
+  
 ## API Endpoints
 
 ### 1. Register User
