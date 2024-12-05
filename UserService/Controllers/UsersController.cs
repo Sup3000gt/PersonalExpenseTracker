@@ -30,11 +30,6 @@ namespace UserService.Controllers
                 return BadRequest("This username is already taken.");
             }
 
-            if (_context.Users.Any(u => u.Email == user.Email))
-            {
-                return BadRequest("An account with this email already exists.");
-            }
-
             // Remove non-numeric characters from phone number
             var phoneDigits = new string(user.PhoneNumber.Where(char.IsDigit).ToArray());
             if (phoneDigits.Length != 10)
@@ -66,16 +61,25 @@ namespace UserService.Controllers
 
             try
             {
-                // Send confirmation email
-                var confirmationLink = $"https://yourdomain.com/api/account/confirm-email?token={user.EmailConfirmationToken}&email={user.Email}";
+                // Generate the confirmation link using the local server URL for testing
+                var confirmationLink = Url.Action(
+                    "ConfirmEmail",
+                    "Users",
+                    new { token = user.EmailConfirmationToken, email = user.Email },
+                    Request.Scheme,
+                    Request.Host.ToUriComponent()
+                );
+
                 var subject = "Please confirm your email";
                 var plainTextContent = $"Hello {user.FirstName},\n\nPlease confirm your email by clicking this link: {confirmationLink}";
                 var htmlContent = $"<p>Hello {user.FirstName},</p><p>Please confirm your email by clicking this link: <a href='{confirmationLink}'>Activate Account</a></p>";
 
+                // Use your email service to send the email
                 await _emailService.SendEmailAsync(user.Email, subject, plainTextContent, htmlContent);
             }
             catch (Exception ex)
             {
+                // Log the exception for debugging
                 Console.WriteLine($"Failed to send email: {ex.Message}");
                 return StatusCode(500, "An error occurred while sending the confirmation email. Please try again later.");
             }
@@ -92,19 +96,21 @@ namespace UserService.Controllers
                 return BadRequest("Invalid token or email.");
             }
 
+            // Retrieve user by email and token
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmationToken == token);
 
             if (user == null)
             {
-                return BadRequest("Invalid token or user does not exist.");
+                return BadRequest("Invalid token or user not found.");
             }
 
+            // Check if the token has expired
             if (user.EmailConfirmationTokenExpires < DateTime.UtcNow)
             {
                 return BadRequest("Token has expired. Please request a new confirmation email.");
             }
 
-            // Mark email as confirmed
+            // Mark the email as confirmed
             user.EmailConfirmed = true;
             user.EmailConfirmationToken = null; // Clear the token
             user.EmailConfirmationTokenExpires = DateTime.MinValue;
@@ -112,7 +118,7 @@ namespace UserService.Controllers
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            return Ok("Email confirmed successfully. You can now log in.");
+            return Ok("Email confirmed successfully.");
         }
 
 
@@ -145,13 +151,5 @@ namespace UserService.Controllers
             return Ok("Login successful.");
         }
 
-        /// <summary>
-        /// Placeholder for sending confirmation emails
-        /// </summary>
-        //private void SendConfirmationEmail(string email, string token)
-        //{
-        //    // Placeholder: Use an actual email service like SendGrid, SMTP, etc.
-        //    Console.WriteLine($"Email sent to {email} with confirmation token: {token}");
-        //}
     }
 }
