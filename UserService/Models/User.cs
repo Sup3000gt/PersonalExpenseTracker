@@ -16,7 +16,7 @@ namespace UserService.Models
         [Required]
         [Display(Name = "Password Hash")]
         [StringLength(255)]
-        public string PasswordHash { get; set; } // Changed Password to PasswordHash
+        public string PasswordHash { get; set; } 
 
         [Required]
         [EmailAddress]
@@ -49,6 +49,10 @@ namespace UserService.Models
 
         public DateTime EmailConfirmationTokenExpires { get; set; }
 
+        // New properties for password reset
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpires { get; set; }
+
         // Constructor to initialize default values
         public User()
         {
@@ -58,6 +62,8 @@ namespace UserService.Models
             FirstName = string.Empty;
             LastName = string.Empty;
             PhoneNumber = string.Empty;
+            PasswordResetToken = null;
+            PasswordResetTokenExpires = null;
         }
     }
 }
