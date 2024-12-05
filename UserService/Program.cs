@@ -1,5 +1,7 @@
 using UserService.Data;
 using Microsoft.EntityFrameworkCore;
+using UserService.Services;
+using UserService.Models;
 
 namespace UserService
 {
@@ -12,6 +14,10 @@ namespace UserService
             // Add services to the container.
             builder.Services.AddDbContext<UserDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlConnection")));
+
+            builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("SendGrid"));
+            builder.Services.AddTransient<IEmailService, EmailService>();
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
