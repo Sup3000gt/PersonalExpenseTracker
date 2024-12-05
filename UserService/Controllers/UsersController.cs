@@ -16,11 +16,13 @@ namespace UserService.Controllers
     {
         private readonly UserDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IPasswordHashingService _passwordHashingService;
 
-        public UsersController(UserDbContext context, IEmailService emailService)
+        public UsersController(UserDbContext context, IEmailService emailService, IPasswordHashingService passwordHashingService)
         {
             _context = context;
             _emailService = emailService;
+            _passwordHashingService = passwordHashingService;
         }
 
         [HttpPost("register")]
@@ -46,8 +48,7 @@ namespace UserService.Controllers
             }
 
             // Hash the password using PasswordHasher<T>
-            var passwordHasher = new PasswordHasher<User>();
-            user.PasswordHash = passwordHasher.HashPassword(user, user.PasswordHash);
+            user.PasswordHash = _passwordHashingService.HashPassword(user, user.PasswordHash);
 
             // Generate email confirmation token
             user.EmailConfirmationToken = Guid.NewGuid().ToString();
@@ -120,8 +121,6 @@ namespace UserService.Controllers
             return Ok("Email confirmed successfully.");
         }
 
-
-        /// Log in a user
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserService.Models.LoginRequest loginRequest)
         {
@@ -136,8 +135,7 @@ namespace UserService.Controllers
                 return Unauthorized("Invalid username or password or email not confirmed.");
             }
 
-            var passwordHasher = new PasswordHasher<User>();
-            var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
+            var result = _passwordHashingService.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
             if (result != PasswordVerificationResult.Success)
             {
                 return Unauthorized("Invalid username or password.");
@@ -208,8 +206,7 @@ namespace UserService.Controllers
             }
 
             // Hash the new password
-            var passwordHasher = new PasswordHasher<User>();
-            user.PasswordHash = passwordHasher.HashPassword(user, request.NewPassword);
+            user.PasswordHash = _passwordHashingService.HashPassword(user, request.NewPassword);
 
             // Clear the token and save changes
             user.PasswordResetToken = null;
@@ -236,17 +233,16 @@ namespace UserService.Controllers
                 return NotFound("User not found.");
             }
 
-            // Verify current password
-            var passwordHasher = new PasswordHasher<User>();
-            var verificationResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
+            // Verify current password using the PasswordHashingService
+            var verificationResult = _passwordHashingService.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
 
             if (verificationResult != PasswordVerificationResult.Success)
             {
                 return Unauthorized("Current password is incorrect.");
             }
 
-            // Hash the new password
-            user.PasswordHash = passwordHasher.HashPassword(user, request.NewPassword);
+            // Hash the new password using the PasswordHashingService
+            user.PasswordHash = _passwordHashingService.HashPassword(user, request.NewPassword);
 
             // Save changes to the database
             _context.Users.Update(user);

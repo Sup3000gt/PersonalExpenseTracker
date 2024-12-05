@@ -11,13 +11,16 @@ namespace UserService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add database service to the container.
             builder.Services.AddDbContext<UserDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlConnection")));
 
+            // Add EmailService to the DI container
             builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("SendGrid"));
             builder.Services.AddTransient<IEmailService, EmailService>();
 
+            // add PasswordHashingService to the DI container
+            builder.Services.AddScoped<IPasswordHashingService, PasswordHashingService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
