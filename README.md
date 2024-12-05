@@ -17,10 +17,6 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
   - Login with username and password
   - Email verification required for account access
 
-## Project Structure
-
-
-
 ## API Endpoints
 
 ### 1. Register User
@@ -39,7 +35,7 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
   }
 
 - **Response**: 200 OK with registration confirmation
-  
+---
 ### 2. Confirm Email
 
 **Method**: `GET`
@@ -48,10 +44,8 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 - `token`: Email confirmation token
 - `email`: User's email address
 **Response**: `200 OK` upon successful email confirmation
-
 ---
-
-## 3. Login
+### 3. Login
 **Method**: `POST`
 **Endpoint**: `/api/Users/login`
 **Request Body**:
