@@ -41,3 +41,21 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 - **Response**: 200 OK with registration confirmation
   
 ### 2. Register User
+## Confirm Email
+
+### Method
+`GET`
+
+### Endpoint
+`/api/Users/confirm-email`
+
+### Query Parameters
+| Parameter | Type   | Description                    | Required |
+|-----------|--------|--------------------------------|----------|
+| `token`   | String | Email confirmation token       | Yes      |
+| `email`   | String | User's email address           | Yes      |
+
+### Response
+- **200 OK**: Email confirmation is successful.
+
+### Example Request
