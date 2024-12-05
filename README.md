@@ -39,4 +39,5 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
   }
 
 - **Response**: 200 OK with registration confirmation
-  ### 2. Register User
+  
+### 2. Register User
