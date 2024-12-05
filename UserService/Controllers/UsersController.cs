@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserService.Services;
-using System.Security.Cryptography;
-using System.Text;
 using UserService.Data;
 using UserService.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace UserService.Controllers
 {
