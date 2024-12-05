@@ -221,6 +221,39 @@ namespace UserService.Controllers
             return Ok("Password reset successfully.");
         }
 
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.CurrentPassword) || string.IsNullOrEmpty(request.NewPassword))
+            {
+                return BadRequest("Invalid request. Please provide all required fields.");
+            }
+
+            // Find user by username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Verify current password
+            var passwordHasher = new PasswordHasher<User>();
+            var verificationResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
+
+            if (verificationResult != PasswordVerificationResult.Success)
+            {
+                return Unauthorized("Current password is incorrect.");
+            }
+
+            // Hash the new password
+            user.PasswordHash = passwordHasher.HashPassword(user, request.NewPassword);
+
+            // Save changes to the database
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok("Password changed successfully.");
+        }
 
     }
 }
