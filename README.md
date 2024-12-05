@@ -37,3 +37,5 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
     "phoneNumber": "string",
     "dateOfBirth": "date"
   }
+
+  - **Method**: 200 OK with registration confirmation
