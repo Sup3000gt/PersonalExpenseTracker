@@ -43,13 +43,10 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 ### 2. Confirm Email
 
 **Method**: `GET`
-
 **Endpoint**: `/api/Users/confirm-email`
-
 **Query Parameters**:
 - `token`: Email confirmation token
 - `email`: User's email address
-
 **Response**: `200 OK` upon successful email confirmation
 
 ---
