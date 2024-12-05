@@ -50,4 +50,8 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 - **Method**: `POST`
 - **Endpoint**: `/api/Users/login`
 - **Request Body**:
-
+  ```json
+{
+  "username": "string",
+  "password": "string"
+}
