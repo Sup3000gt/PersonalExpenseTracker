@@ -57,3 +57,15 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
   }
 
 - **Response**: 200 OK upon successful authentication
+---
+## Configuration
+
+### Database Connection
+Configure in `appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "AzureSqlConnection": "Server=<your-server>;Database=<your-database>;User ID=<your-username>;Password=<your-password>;"
+  }
+}
