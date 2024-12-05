@@ -18,3 +18,22 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
   - Email verification required for account access
 
 ## Project Structure
+
+
+
+## API Endpoints
+
+### 1. Register User
+- **Method**: POST
+- **Endpoint**: `/api/Users/register`
+- **Request Body**:
+  ```json
+  {
+    "username": "string",
+    "password": "string",
+    "email": "string",
+    "firstName": "string",
+    "lastName": "string",
+    "phoneNumber": "string",
+    "dateOfBirth": "date"
+  }
