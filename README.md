@@ -46,7 +46,7 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 **Response**: `200 OK` upon successful email confirmation
 ---
 ### 3. Login
-**Method**: `POST`
-**Endpoint**: `/api/Users/login`
-**Request Body**:
+- **Method**: `POST`
+- **Endpoint**: `/api/Users/login`
+- **Request Body**:
 
