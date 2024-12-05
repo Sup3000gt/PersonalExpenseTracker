@@ -59,7 +59,6 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 - **Response**: 200 OK upon successful authentication
 ---
 ## Configuration
-
 ### Database Connection
 Configure in `appsettings.json`:
 
@@ -71,12 +70,13 @@ Configure in `appsettings.json`:
 }
 ```
 
-### Database Connection
+### Email Service Configuration
 Configure in `appsettings.json`:
 
 ```json
 {
-"ConnectionStrings": {
-  "AzureSqlConnection": "Server=<your-server>;Database=<your-database>;User ID=<your-username>;Password=<your-password>;"
+  "SendGrid": {
+    "ApiKey": "your_sendgrid_api_key"
+  }
 }
-}
+```
