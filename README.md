@@ -34,7 +34,6 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
     "dateOfBirth": "date"
   }
 
-
 - **Response**: 200 OK with registration confirmation
 ---
 ### 2. Confirm Email
@@ -44,6 +43,7 @@ The **UserService** is a core component of the Personal Expense Tracker applicat
 **Query Parameters**:
 - `token`: Email confirmation token
 - `email`: User's email address
+  
 **Response**: `200 OK` upon successful email confirmation
 ---
 ### 3. Login
