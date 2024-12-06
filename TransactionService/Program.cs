@@ -1,3 +1,6 @@
+using TransactionService.Data;
+using Microsoft.EntityFrameworkCore;
+using TransactionService.Models;
 
 namespace TransactionService
 {
@@ -7,7 +10,10 @@ namespace TransactionService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+
+            // Add database service to the container.
+            builder.Services.AddDbContext<TransactionDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlConnection")));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
