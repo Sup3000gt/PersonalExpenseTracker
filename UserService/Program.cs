@@ -19,6 +19,9 @@ namespace UserService
             builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("SendGrid"));
             builder.Services.AddTransient<IEmailService, EmailService>();
 
+            // Add JwtTokenService to the DI container
+            builder.Services.AddScoped<JwtTokenService>();
+
             // add PasswordHashingService to the DI container
             builder.Services.AddScoped<IPasswordHashingService, PasswordHashingService>();
 
@@ -26,6 +29,7 @@ namespace UserService
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
 
             var app = builder.Build();
 

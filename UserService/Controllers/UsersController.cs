@@ -15,12 +15,14 @@ namespace UserService.Controllers
         private readonly UserDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IPasswordHashingService _passwordHashingService;
+        private readonly JwtTokenService _jwtTokenService;
 
-        public UsersController(UserDbContext context, IEmailService emailService, IPasswordHashingService passwordHashingService)
+        public UsersController(UserDbContext context, IEmailService emailService, IPasswordHashingService passwordHashingService, JwtTokenService jwtTokenService)
         {
             _context = context;
             _emailService = emailService;
             _passwordHashingService = passwordHashingService;
+            _jwtTokenService = jwtTokenService;
         }
 
         [HttpPost("register")]
@@ -138,21 +140,34 @@ namespace UserService.Controllers
                 return Unauthorized("Invalid username or password.");
             }
 
-            return Ok("Login successful.");
+            // Generate a JWT token
+            var token = _jwtTokenService.GenerateToken(user);  // Implement this method
+
+            return Ok(new { message = "Login successful.", token, userId = user.Id }); // Include userId if needed
         }
 
         [HttpPost("request-password-reset")]
-        public async Task<IActionResult> RequestPasswordReset([FromBody] string email)
+        public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequest request)
         {
-            // Find user by email
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null)
+            if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Email))
             {
-                return BadRequest("User not found.");
+                return BadRequest("Invalid request. Please provide both username and email.");
             }
 
-            // Generate password reset token
-            user.PasswordResetToken = Guid.NewGuid().ToString();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            // Find user by username and email
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username && u.Email == request.Email);
+            if (user == null)
+            {
+                return NotFound("No matching account found.");
+            }
+
+            // Generate a temporary password
+            var tempPassword = Guid.NewGuid().ToString("N").Substring(0, 8); // Example: random 8-character string
+            user.PasswordHash = _passwordHashingService.HashPassword(user, tempPassword);
             user.PasswordResetTokenExpires = DateTime.UtcNow.AddHours(1);
 
             _context.Users.Update(user);
@@ -160,59 +175,19 @@ namespace UserService.Controllers
 
             try
             {
-                // Send password reset email
-                var resetLink = Url.Action(
-                    "ResetPassword",
-                    "Users",
-                    new { token = user.PasswordResetToken, email = user.Email },
-                    Request.Scheme
-                );
-                var subject = "Reset your password";
-                var plainTextContent = $"Click here to reset your password: {resetLink}";
-                var htmlContent = $"<p>Click the link below to reset your password:</p><a href='{resetLink}'>Reset Password</a>";
+                // Send email with temporary password
+                var subject = "Your Temporary Password";
+                var plainTextContent = $"Your temporary password is: {tempPassword}\nIt will expire in 1 hour.";
+                var htmlContent = $"<p>Your temporary password is:</p><strong>{tempPassword}</strong><p>It will expire in 1 hour.</p>";
                 await _emailService.SendEmailAsync(user.Email, subject, plainTextContent, htmlContent);
 
-                return Ok("Password reset email sent.");
+                return Ok("Temporary password sent to your email.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending password reset email: {ex.Message}");
-                return StatusCode(500, "Error sending password reset email.");
+                Console.WriteLine($"Error sending email: {ex.Message}");
+                return StatusCode(500, "Error sending temporary password email.");
             }
-        }
-
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
-        {
-            if (string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.NewPassword))
-            {
-                return BadRequest("Invalid request.");
-            }
-
-            // Find user by email and token
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.PasswordResetToken == request.Token);
-            if (user == null)
-            {
-                return BadRequest("Invalid token or email.");
-            }
-
-            // Check if the token has expired
-            if (user.PasswordResetTokenExpires < DateTime.UtcNow)
-            {
-                return BadRequest("Token has expired. Please request a new password reset.");
-            }
-
-            // Hash the new password
-            user.PasswordHash = _passwordHashingService.HashPassword(user, request.NewPassword);
-
-            // Clear the token and save changes
-            user.PasswordResetToken = null;
-            user.PasswordResetTokenExpires = null;
-
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-
-            return Ok("Password reset successfully.");
         }
 
         [HttpPost("change-password")]
