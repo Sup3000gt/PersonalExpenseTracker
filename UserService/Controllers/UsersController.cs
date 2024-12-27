@@ -193,7 +193,7 @@ namespace UserService.Controllers
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.CurrentPassword) || string.IsNullOrEmpty(request.NewPassword))
+            if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.NewPassword))
             {
                 return BadRequest("Invalid request. Please provide all required fields.");
             }
@@ -205,14 +205,6 @@ namespace UserService.Controllers
                 return NotFound("User not found.");
             }
 
-            // Verify current password using the PasswordHashingService
-            var verificationResult = _passwordHashingService.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
-
-            if (verificationResult != PasswordVerificationResult.Success)
-            {
-                return Unauthorized("Current password is incorrect.");
-            }
-
             // Hash the new password using the PasswordHashingService
             user.PasswordHash = _passwordHashingService.HashPassword(user, request.NewPassword);
 
@@ -222,6 +214,7 @@ namespace UserService.Controllers
 
             return Ok("Password changed successfully.");
         }
+
 
         [HttpGet("profile")]
         public async Task<IActionResult> GetUserProfile([FromQuery] string username)

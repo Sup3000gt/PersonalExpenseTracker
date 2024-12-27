@@ -8,9 +8,6 @@ namespace UserService.Models
         public string Username { get; set; }
 
         [Required]
-        public string CurrentPassword { get; set; }
-
-        [Required]
         [MinLength(8, ErrorMessage = "New password must be at least 8 characters long.")]
         public string NewPassword { get; set; }
     }
