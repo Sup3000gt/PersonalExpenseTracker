@@ -1,5 +1,5 @@
 
-# Expense Tracker Application
+# Expense Tracker Application (Backend)
 
 ## Overview
 The **Expense Tracker Application** is a full-stack solution designed to help users manage their personal finances effectively. The system is built using a microservices architecture, comprising three main services:
